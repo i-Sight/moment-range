@@ -4,13 +4,13 @@
     define(["moment"], function (a0) {
       return (root['DateRange'] = factory(a0));
     });
-  } else if (typeof exports === 'object') {
+  } else if (typeof module === 'object' && module.exports) {
     // Node. Does not work with strict CommonJS, but
     // only CommonJS-like environments that support module.exports,
     // like Node.
     module.exports = factory(require("moment"));
   } else {
-    root['DateRange'] = factory(moment);
+    root['DateRange'] = factory(root["moment"]);
   }
 }(this, function (moment) {
 
@@ -70,8 +70,13 @@ function DateRange(start, end) {
     }
   }
 
-  this.start = (s === null) ? moment(-8640000000000000) : moment(s);
-  this.end   = (e === null) ? moment(8640000000000000) : moment(e);
+
+  this.start = (s === null) ? moment(-8640000000000000) : getMoment(s);
+  this.end   = (e === null) ? moment(8640000000000000) : getMoment(e);
+}
+
+function getMoment(o) {
+	return (moment && moment.isMoment && moment.isMoment(o)) ? o : moment(o);
 }
 
 /**
@@ -333,7 +338,7 @@ function _byRange(interval, hollaback, exclusive) {
  * @return {!String}
  */
 DateRange.prototype.toString = function() {
-  return this.start.format() + '/' + this.end.format();
+  return this.start.toISOString() + '/' + this.end.toISOString();
 };
 
 /**
@@ -393,49 +398,54 @@ DateRange.prototype.diff = function(unit) {
 // Moment Extensions
 //-----------------------------------------------------------------------------
 
-/**
- * Build a date range.
- *
- * @param {(Moment|Date)} start Start of range
- * @param {(Moment|Date)} end End of range
- *
- * @this {Moment}
- *
- * @return {!DateRange}
- */
-moment.range = function(start, end) {
-  if (start in INTERVALS) {
-    return new DateRange(moment(this).startOf(start), moment(this).endOf(start));
-  } else {
-    return new DateRange(start, end);
-  }
+DateRange.extend = function(m) {
+	/**
+	 * Build a date range.
+	 *
+	 * @param {(Moment|Date)} start Start of range
+	 * @param {(Moment|Date)} end End of range
+	 *
+	 * @this {Moment}
+	 *
+	 * @return {!DateRange}
+	 */
+	m.range = function(start, end) {
+		if (start in INTERVALS) {
+			return new DateRange(m(this).startOf(start), m(this).endOf(start));
+		} else {
+			return new DateRange(start, end);
+		}
+	};
+
+	/**
+	 * Expose constructor
+	 *
+	 * @const
+	 */
+	m.range.constructor = DateRange;
+
+	/**
+	 * @deprecated
+	 */
+	m.fn.range = m.range;
+
+	/**
+	 * Check if the current moment is within a given date range.
+	 *
+	 * @param {!DateRange} range Date range to check
+	 *
+	 * @this {Moment}
+	 *
+	 * @return {!boolean}
+	 */
+	m.fn.within = function(range) {
+		return range.contains(this._d);
+	};
+
+	return m;
 };
 
-/**
- * Expose constructor
- *
- * @const
- */
-moment.range.constructor = DateRange;
-
-/**
- * @deprecated
- */
-moment.fn.range = moment.range;
-
-/**
- * Check if the current moment is within a given date range.
- *
- * @param {!DateRange} range Date range to check
- *
- * @this {Moment}
- *
- * @return {!boolean}
- */
-moment.fn.within = function(range) {
-  return range.contains(this._d);
-};
-
+DateRange.extend(moment);
 
 //-----------------------------------------------------------------------------
 // Export

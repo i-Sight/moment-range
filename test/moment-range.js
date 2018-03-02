@@ -1,9 +1,8 @@
 /* jshint node: true, maxlen: 200, -W030 */
 /* global describe, it */
 
-var should    = require('should');
-var moment    = require('moment');
-require('../lib/moment-range');
+var should = require('should');
+var moment = require('../lib/moment-range').extend(require('moment'));
 
 describe('Moment', function() {
   var dr = moment.range(new Date(Date.UTC(2011, 2, 5)), new Date(Date.UTC(2011, 5, 5)));
@@ -775,8 +774,8 @@ describe('DateRange', function() {
 
   describe('#toString()', function() {
     it('should be a correctly formatted ISO8601 Time Interval', function() {
-      var start = '2015-01-17T09:50:04+00:00';
-      var end   = '2015-04-17T08:29:55+00:00';
+      var start = '2015-01-17T09:50:04.000Z';
+      var end   = '2015-04-17T08:29:55.000Z';
       var dr = moment.range(moment.utc(start), moment.utc(end));
 
       dr.toString().should.equal(start + '/' + end);
