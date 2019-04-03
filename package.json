@@ -1,5 +1,5 @@
 {
-  "name": "moment-range",
+  "name": "@isight/moment-range",
   "description": "Fancy date ranges for Moment.js",
   "author": "Gianni Chiappetta <gianni@runlevel6.org> (http://butt.zone)",
   "contributors": [
